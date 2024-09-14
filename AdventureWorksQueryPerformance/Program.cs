@@ -26,6 +26,7 @@ services.AddTransient<BulkInsertHandler>(provider =>
     new BulkInsertHandler(configuration.GetConnectionString("AdventureWorksDb")));
 
 services.AddTransient<QueryPerformanceService>();
+services.AddTransient<ClearCacheService>();
 
 var serviceProvider = services.BuildServiceProvider();
 var queryService = serviceProvider.GetRequiredService<QueryPerformanceService>();
