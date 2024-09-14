@@ -1,4 +1,5 @@
 ﻿using AdventureWorksQueryPerformance.DBContext;
+using AdventureWorksQueryPerformance.Queries.EFQuery;
 using AdventureWorksQueryPerformance.Request;
 using MediatR;
 
@@ -15,7 +16,13 @@ namespace AdventureWorksQueryPerformance.Handler
 
         public async Task<Unit> Handle(EFQueryRequest request, CancellationToken cancellationToken)
         {
-            // Example EF Query
+            if (request.QueryType == "Foreach")
+            {
+                await TopHundredCustomersSpendingEF.GetCustomerSpendingWithForeachAsync(_context);
+            } else
+            {
+                var topCustomersQuery = TopHundredCustomersSpendingEF.GetTopCustomersDetailedQuery(_context);
+            }
             return Unit.Value;
         }
     }

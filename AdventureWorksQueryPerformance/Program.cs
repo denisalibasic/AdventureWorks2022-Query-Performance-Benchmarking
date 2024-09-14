@@ -2,9 +2,12 @@
 using AdventureWorksQueryPerformance.Handler;
 using AdventureWorksQueryPerformance.Service;
 using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
@@ -14,16 +17,20 @@ var configuration = new ConfigurationBuilder()
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
 
+// Register the connection string as a singleton
+services.AddSingleton(provider => configuration.GetConnectionString("AdventureWorksDb"));
+
+// Register DBContext
 services.AddDbContext<AdventureWorksDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("AdventureWorksDb")));
-services.AddMediatR(typeof(Program));
 
-services.AddTransient<RawSQLQueryHandler>(provider =>
-    new RawSQLQueryHandler(configuration.GetConnectionString("AdventureWorksDb")));
-services.AddTransient<StoredProcedureQueryHandler>(provider =>
-    new StoredProcedureQueryHandler(configuration.GetConnectionString("AdventureWorksDb")));
-services.AddTransient<BulkInsertHandler>(provider =>
-    new BulkInsertHandler(configuration.GetConnectionString("AdventureWorksDb")));
+// Register MediatR
+services.AddMediatR(Assembly.GetExecutingAssembly());
+
+// Handlers
+services.AddTransient<EFQueryHandler>();
+services.AddTransient<RawSQLQueryHandler>();
+services.AddTransient<StoredProcedureQueryHandler>();
 
 services.AddTransient<QueryPerformanceService>();
 services.AddTransient<ClearCacheService>();
@@ -31,4 +38,4 @@ services.AddTransient<ClearCacheService>();
 var serviceProvider = services.BuildServiceProvider();
 var queryService = serviceProvider.GetRequiredService<QueryPerformanceService>();
 
-//await queryService.RunQueriesSequentiallyAsync();
+await queryService.RunQueriesSequentiallyAsync();

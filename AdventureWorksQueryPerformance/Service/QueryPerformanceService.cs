@@ -18,14 +18,13 @@ namespace AdventureWorksQueryPerformance.Service
         public async Task RunQueriesSequentiallyAsync()
         {
             _clearCacheService.ClearCache();
-            await ExecuteAndMeasureTimeAsync(new EFQueryRequest(), "EF Query");
+            await ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = "Foreach" }, "EF Foreach Query");
             _clearCacheService.ClearCache();
-            await ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest(), "Raw SQL Query");
+            await ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = "Optimized" }, "EF Optimized Query");
             _clearCacheService.ClearCache();
             await ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest(), "Stored Procedure");
             _clearCacheService.ClearCache();
-            await ExecuteAndMeasureTimeAsync(new BulkInsertRequest(), "Bulk Insert");
-            _clearCacheService.ClearCache();
+            await ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest(), "Raw SQL Query");
         }
 
         private async Task ExecuteAndMeasureTimeAsync(IRequest<Unit> request, string queryType)
@@ -34,6 +33,11 @@ namespace AdventureWorksQueryPerformance.Service
             await _mediator.Send(request);
             stopwatch.Stop();
             Console.WriteLine($"{queryType} took {stopwatch.ElapsedMilliseconds} ms");
+        }
+
+        private void TaskDelay()
+        {
+            Task.Delay(2000);
         }
     }
 }
