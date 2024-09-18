@@ -24,11 +24,6 @@ namespace AdventureWorksQueryPerformance.Handler
             using var command = new SqlCommand(query, connection);
             using var reader = await command.ExecuteReaderAsync(cancellationToken);
 
-            while (await reader.ReadAsync(cancellationToken))
-            {
-
-            }
-
             return Unit.Value;
         }
     }

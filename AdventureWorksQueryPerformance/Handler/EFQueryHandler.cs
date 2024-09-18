@@ -19,9 +19,15 @@ namespace AdventureWorksQueryPerformance.Handler
             if (request.QueryType == "Foreach")
             {
                 await TopHundredCustomersSpendingEF.GetCustomerSpendingWithForeachAsync(_context);
-            } else
+            } else if (request.QueryType == "Optimized ex 1")
             {
                 var topCustomersQuery = TopHundredCustomersSpendingEF.GetTopCustomersDetailedQuery(_context);
+            }
+            else if (request.QueryType == "Optimized ex 2")
+            {
+                var startDate = new DateTime(2012, 1, 1);
+                var endDate = new DateTime(2014, 12, 31);
+                var topCustomersQuery = TopHundredCustomersSpendingEF.GetSalesPerformanceAsync(_context, startDate, endDate);
             }
             return Unit.Value;
         }
