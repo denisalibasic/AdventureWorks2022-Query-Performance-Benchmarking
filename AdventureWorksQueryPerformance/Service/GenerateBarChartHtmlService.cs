@@ -18,10 +18,12 @@ namespace AdventureWorksQueryPerformance.Service
             sb.AppendLine("</head>");
             sb.AppendLine("<body>");
             sb.AppendLine("<h1>Query Performance Results</h1>");
-            sb.AppendLine("<canvas id='myChart' width='800' height='400'></canvas>");
+
+            // Bar chart
+            sb.AppendLine("<canvas id='myBarChart' width='800' height='400'></canvas>");
             sb.AppendLine("<script>");
-            sb.AppendLine("const ctx = document.getElementById('myChart').getContext('2d');");
-            sb.AppendLine("const myChart = new Chart(ctx, {");
+            sb.AppendLine("const ctxBar = document.getElementById('myBarChart').getContext('2d');");
+            sb.AppendLine("const myBarChart = new Chart(ctxBar, {");
             sb.AppendLine("    type: 'bar',");
             sb.AppendLine("    data: {");
             sb.AppendLine("        labels: [");
@@ -58,10 +60,72 @@ namespace AdventureWorksQueryPerformance.Service
             sb.AppendLine("    }");
             sb.AppendLine("});");
             sb.AppendLine("</script>");
+
+            // Pie charts for each query type
+            GeneratePieChart(sb, "SalesPerformance", results, new[] {
+                "SpSalesPerformance", "EfSalesPerformance", "RawSalesPerformance"
+            });
+
+            GeneratePieChart(sb, "LargeData", results, new[] {
+                "SpLargeData", "EfLargeData", "RawLargeData"
+            });
+
+            GeneratePieChart(sb, "LargeDataGreaterThan", results, new[] {
+                "SpLargeDataGreaterThan", "EfLargeDataGreaterThan", "RawLargeDataGreaterThan"
+            });
+
+            GeneratePieChart(sb, "LargeDataGreaterThanWithIndex", results, new[] {
+                "SpLargeDataGreaterThanWithIndex", "EfLargeDataGreaterThanWithIndex", "RawLargeDataGreaterThanWithIndex"
+            });
+
+            GeneratePieChart(sb, "LargeDataGreaterThanWithIndexSecond", results, new[] {
+                "SpLargeDataGreaterThanWithIndexSecond", "EfLargeDataGreaterThanWithIndexSecond", "RawLargeDataGreaterThanWithIndexSecond"
+            });
+
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
 
             File.WriteAllText(filePath, sb.ToString());
+        }
+
+        private void GeneratePieChart(StringBuilder sb, string chartId, List<TaskResult> results, string[] taskNames)
+        {
+            sb.AppendLine($"<canvas id='{chartId}' width='400' height='400'></canvas>");
+            sb.AppendLine("<script>");
+            sb.AppendLine($"const ctx{chartId} = document.getElementById('{chartId}').getContext('2d');");
+            sb.AppendLine($"const {chartId}Chart = new Chart(ctx{chartId}, {{");
+            sb.AppendLine("    type: 'pie',");
+            sb.AppendLine("    data: {");
+            sb.AppendLine("        labels: [");
+
+            // Labels
+            for (int i = 0; i < taskNames.Length; i++)
+            {
+                sb.Append($"'{taskNames[i]}'");
+                if (i < taskNames.Length - 1)
+                    sb.Append(", ");
+            }
+            sb.AppendLine("],");
+
+            sb.AppendLine("        datasets: [{");
+            sb.AppendLine("            data: [");
+
+            // Data
+            for (int i = 0; i < taskNames.Length; i++)
+            {
+                var result = results.FirstOrDefault(r => r.TaskName == taskNames[i]);
+                sb.Append(result != null ? result.ElapsedMilliseconds.ToString() : "0");
+                if (i < taskNames.Length - 1)
+                    sb.Append(", ");
+            }
+            sb.AppendLine("],");
+            sb.AppendLine("            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],");
+            sb.AppendLine("            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],");
+            sb.AppendLine("            borderWidth: 1");
+            sb.AppendLine("        }]");
+            sb.AppendLine("    }");
+            sb.AppendLine("});");
+            sb.AppendLine("</script>");
         }
     }
 }
