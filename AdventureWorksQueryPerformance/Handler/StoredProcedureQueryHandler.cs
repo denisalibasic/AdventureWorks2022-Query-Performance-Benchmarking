@@ -1,7 +1,9 @@
-﻿using AdventureWorksQueryPerformance.Request;
+﻿using AdventureWorksQueryPerformance.Enums;
+using AdventureWorksQueryPerformance.Request;
 using MediatR;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System.Data;
 
 namespace AdventureWorksQueryPerformance.Handler
@@ -22,11 +24,16 @@ namespace AdventureWorksQueryPerformance.Handler
 
             string storedProcedureName = request.QueryType switch
             {
-                "SP Cursor" => "GetTopCustomersDetailedWithCursor",
-                "SP ex 1" => "GetTopCustomersDetailed",
-                "SP ex 2" => "GetSalesPerformance"
+                SpQueryEnums.SpCursor => "GetTopCustomersDetailedWithCursor",
+                SpQueryEnums.SpGetTopHundred => "GetTopCustomersDetailed",
+                SpQueryEnums.SpSalesPerformance => "GetSalesPerformance",
+                SpQueryEnums.SpLargeData => "GetSalesLargeDataAllRows",
+                SpQueryEnums.SpLargeDataGreaterThan => "GetSalesLargeDataByValue",
+                SpQueryEnums.SpLargeDataGreaterThanWithIndex => "GetSalesLargeDataByValueWithIndex",
+                _ => throw new ArgumentOutOfRangeException(nameof(request.QueryType), "Unknown query type")
             };
 
+            Log.Information("Executing " + request.QueryType.GetDescription());
             using var command = new SqlCommand(storedProcedureName, connection);
             command.CommandType = CommandType.StoredProcedure;
 

@@ -2,17 +2,22 @@
 using AdventureWorksQueryPerformance.Handler;
 using AdventureWorksQueryPerformance.Service;
 using MediatR;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 using System.Reflection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
     .Build();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
+
+Log.Information("Application Starting...");
 
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
@@ -22,6 +27,8 @@ services.AddSingleton(provider => configuration.GetConnectionString("AdventureWo
 
 // Register DBContext
 services.AddDbContext<AdventureWorksDbContext>(options =>
+    options.UseSqlServer(configuration.GetConnectionString("AdventureWorksDb")));
+services.AddDbContextFactory<AdventureWorksDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("AdventureWorksDb")));
 
 // Register MediatR
@@ -34,8 +41,13 @@ services.AddTransient<StoredProcedureQueryHandler>();
 
 services.AddTransient<QueryPerformanceService>();
 services.AddTransient<ClearCacheService>();
+services.AddTransient<ExecuteAndMeasureTimeService>();
+services.AddTransient<DisplayResultsService>();
+services.AddTransient<GenerateBarChartHtmlService>();
 
 var serviceProvider = services.BuildServiceProvider();
 var queryService = serviceProvider.GetRequiredService<QueryPerformanceService>();
 
-await queryService.RunQueriesSequentiallyAsync();
+await queryService.RunQueriesSequentially();
+
+Log.Information("Application execution done...");

@@ -1,4 +1,5 @@
-﻿using AdventureWorksQueryPerformance.Request;
+﻿using AdventureWorksQueryPerformance.Enums;
+using AdventureWorksQueryPerformance.Request;
 using MediatR;
 using System.Diagnostics;
 using System.Text.Json;
@@ -7,71 +8,58 @@ namespace AdventureWorksQueryPerformance.Service
 {
     public class QueryPerformanceService
     {
-        private readonly IMediator _mediator;
         private readonly ClearCacheService _clearCacheService;
-        private readonly List<TaskResult> _results = new();
+        private readonly ExecuteAndMeasureTimeService _executeAndMeasureTimeService;
+        private readonly DisplayResultsService _displayResultsService;
+        private readonly GenerateBarChartHtmlService _generateBarChartHtmlService;
 
-        public QueryPerformanceService(IMediator mediator , ClearCacheService clearCacheService)
+        public QueryPerformanceService(ClearCacheService clearCacheService
+            ,ExecuteAndMeasureTimeService executeAndMeasureTimeService
+            ,DisplayResultsService displayResultsService
+            ,GenerateBarChartHtmlService generateBarChartHtml)
         {
-            _mediator = mediator;
             _clearCacheService = clearCacheService;
+            _executeAndMeasureTimeService = executeAndMeasureTimeService;
+            _displayResultsService = displayResultsService;
+            _generateBarChartHtmlService = generateBarChartHtml;
         }
 
-        public async Task RunQueriesSequentiallyAsync()
+        public async Task RunQueriesSequentially()
         {
-            _clearCacheService.ClearCache();
-            _results.Clear();
+            _executeAndMeasureTimeService.ClearResults();
 
-            var tasks = new List<Task>
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpGetTopHundred }, SpQueryEnums.SpGetTopHundred.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpCursor }, SpQueryEnums.SpCursor.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawGetTopHundred }, EfRawQueryEnums.RawGetTopHundred.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfForEach }, EfQueryEnums.EfForEach.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfGetTopHundred }, EfQueryEnums.EfGetTopHundred.GetDescription()));
+
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpSalesPerformance }, SpQueryEnums.SpSalesPerformance.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfSalesPerformance }, EfQueryEnums.EfSalesPerformance.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawSalesPerformance }, EfRawQueryEnums.RawSalesPerformance.GetDescription()));
+
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpLargeData }, SpQueryEnums.SpLargeData.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfLargeData }, EfQueryEnums.EfLargeData.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawLargeData }, EfRawQueryEnums.RawLargeData.GetDescription()));
+
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpLargeDataGreaterThan }, SpQueryEnums.SpLargeDataGreaterThan.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfLargeDataGreaterThan }, EfQueryEnums.EfLargeDataGreaterThan.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawLargeDataGreaterThan }, EfRawQueryEnums.RawLargeDataGreaterThan.GetDescription()));
+
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpLargeDataGreaterThanWithIndex }, SpQueryEnums.SpLargeDataGreaterThanWithIndex.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfLargeDataGreaterThanWithIndex }, EfQueryEnums.EfLargeDataGreaterThanWithIndex.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawLargeDataGreaterThanWithIndex }, EfRawQueryEnums.RawLargeDataGreaterThanWithIndex.GetDescription()));
+
+            var results = _executeAndMeasureTimeService.GetResults();
+
+            string filePath = "QueryPerformanceResults.html";
+            _generateBarChartHtmlService.GenerateBarChartHtml(results, filePath);
+
+            Process.Start(new ProcessStartInfo
             {
-                ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = "SP ex 1" } , "Stored Procedure ex 1"),
-                //ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = "SP Cursor" } , "Stored Procedure cursor"),
-                ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest(), "EF Raw SQL Query"),
-                //ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = "Foreach" }, "EF Foreach Query"),
-                ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = "Optimized ex 1" }, "EF Optimized Query ex 1"),
-
-            };
-            await Task.WhenAll(tasks);
-
-            var secondBatchTasks = new List<Task>
-            {
-                ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = "SP ex 2" }, "Stored Procedure ex 2"),
-                ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = "Optimized ex 2" }, "EF Optimized Query ex 2")
-            };
-
-            await Task.WhenAll(secondBatchTasks);
-
-            DisplayResultsAsJson();
-        }
-
-        private async Task ExecuteAndMeasureTimeAsync(IRequest<Unit> request, string queryType)
-        {
-            Console.WriteLine($"{queryType} started...");
-            var stopwatch = Stopwatch.StartNew();
-            await _mediator.Send(request);
-            stopwatch.Stop();
-
-            var elapsedTime = stopwatch.ElapsedMilliseconds;
-            _results.Add(new TaskResult
-            {
-                TaskName = queryType,
-                ElapsedMilliseconds = elapsedTime
+                FileName = filePath,
+                UseShellExecute = true
             });
-
-            Console.WriteLine($"{queryType} took {elapsedTime} ms");
         }
-
-        private void DisplayResultsAsJson()
-        {
-            var json = JsonSerializer.Serialize(_results, new JsonSerializerOptions { WriteIndented = true });
-            Console.WriteLine("Query performance results:");
-            Console.WriteLine(json);
-        }
-    }
-
-    public class TaskResult
-    {
-        public string TaskName { get; set; } = string.Empty;
-        public long ElapsedMilliseconds { get; set; }
     }
 }

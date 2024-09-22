@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using AdventureWorksQueryPerformance.Enums;
+using MediatR;
 
 namespace AdventureWorksQueryPerformance.Request
 {
     public class StoredProcedureQueryRequest : IRequest<Unit>
     {
-        public string? QueryType { get; set; }
+        public SpQueryEnums QueryType { get; set; }
     }
 }

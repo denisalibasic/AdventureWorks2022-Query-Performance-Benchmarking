@@ -1,16 +1,12 @@
 ﻿using AdventureWorksQueryPerformance.DBContext;
+using AdventureWorksQueryPerformance.Queries.EFQuery.Results;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdventureWorksQueryPerformance.Queries.EFQuery
 {
-    public static class TopHundredCustomersSpendingEF
+    public static class EfQueries
     {
-        public static async Task<List<CustomerSpendingDto>> GetTopCustomersDetailedQuery(AdventureWorksDbContext context)
+        public static async Task<List<CustomerSpendingResult>> GetTopCustomersDetailedQuery(AdventureWorksDbContext context)
         {
             var topCustomers = context.SalesOrderHeaders
 
@@ -29,7 +25,7 @@ namespace AdventureWorksQueryPerformance.Queries.EFQuery
                         join c in context.Customers on soh.CustomerID equals c.CustomerID
                         join tc in topCustomers on c.CustomerID equals tc.CustomerID
                         where soh.OrderDate >= new DateTime(2012, 1, 1) && soh.OrderDate <= new DateTime(2014, 12, 31)
-                        select new CustomerSpendingDto
+                        select new CustomerSpendingResult
                         {
                             CustomerID = c.CustomerID,
                             ProductID = p.ProductID,
@@ -49,9 +45,9 @@ namespace AdventureWorksQueryPerformance.Queries.EFQuery
             return await query.ToListAsync();
         }
 
-        public static async Task<List<CustomerSpendingDto>> GetCustomerSpendingWithForeachAsync(AdventureWorksDbContext context)
+        public static async Task<List<CustomerSpendingResult>> GetCustomerSpendingWithForeachAsync(AdventureWorksDbContext context)
         {
-            var customerSpendings = new List<CustomerSpendingDto>();
+            var customerSpendings = new List<CustomerSpendingResult>();
 
             var startDate = new DateTime(2012, 1, 1);
             var endDate = new DateTime(2014, 12, 31);
@@ -90,7 +86,7 @@ namespace AdventureWorksQueryPerformance.Queries.EFQuery
 
                     foreach (var sod in salesOrderDetails)
                     {
-                        customerSpendings.Add(new CustomerSpendingDto
+                        customerSpendings.Add(new CustomerSpendingResult
                         {
                             CustomerID = customer.CustomerID,
                             ProductID = sod.ProductID,
@@ -145,30 +141,43 @@ namespace AdventureWorksQueryPerformance.Queries.EFQuery
 
             return rankedResult;
         }
-    }
 
+        public static async Task<List<LargeDataTestResult>> GetLargeDataAsync(AdventureWorksDbContext context)
+        {
+            return await context.LargeDataTests
+                .Select(item => new LargeDataTestResult
+                {
+                    Id = item.Id,
+                    Date = item.Date,
+                    Name = item.Name,
+                    Value = item.Value
+                }).ToListAsync();
+        }
 
-    public class CustomerSpendingDto
-    {
-        public int CustomerID { get; set; }
-        public int ProductID { get; set; }
-        public string ProductName { get; set; }
-        public DateTime OrderDate { get; set; }
-        public short OrderQty { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal LineTotal { get; set; }
-        public decimal TotalDue { get; set; }
-        public int TotalOrders { get; set; }
-        public decimal TotalSalesForProduct { get; set; }
-        public decimal TotalSpent { get; set; }
-    }
+        public static async Task<List<LargeDataTestResult>> GetLargeDataByValueAsync(AdventureWorksDbContext context)
+        {
+            return await context.LargeDataTests
+                .Where(item => item.Value > 4917)
+                .Select(item => new LargeDataTestResult
+                {
+                    Id = item.Id,
+                    Date = item.Date,
+                    Name = item.Name,
+                    Value = item.Value
+                }).ToListAsync();
+        }
 
-    public class SalesPerformanceResult
-    {
-        public int Rank { get; set; }
-        public int Year { get; set; }
-        public int ProductID { get; set; }
-        public decimal TotalSales { get; set; }
-        public int TotalOrders { get; set; }
+        public static async Task<List<LargeDataTestResult>> GetLargeDataByValueWithIndexAsync(AdventureWorksDbContext context)
+        {
+            return await context.LargeDataTestWithIndices
+                .Where(item => item.Value > 4917)
+                .Select(item => new LargeDataTestResult
+                {
+                    Id = item.Id,
+                    Date = item.Date,
+                    Name = item.Name,
+                    Value = item.Value
+                }).ToListAsync();
+        }
     }
 }

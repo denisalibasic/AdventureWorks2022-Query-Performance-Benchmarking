@@ -15,6 +15,8 @@ namespace AdventureWorksQueryPerformance.DBContext
         public DbSet<Product> Products { get; set; }
         public DbSet<SalesOrderHeader> SalesOrderHeaders { get; set; }
         public DbSet<SalesOrderDetail> SalesOrderDetails { get; set; }
+        public DbSet<LargeDataTest> LargeDataTests { get; set; }
+        public DbSet<LargeDataTestWithIndex> LargeDataTestWithIndices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +32,12 @@ namespace AdventureWorksQueryPerformance.DBContext
             modelBuilder.Entity<Customer>()
                 .ToTable("Customer", "Sales");
 
+            modelBuilder.Entity<LargeDataTest>()
+                .ToTable("LargeDataTest", "dbo");
+
+            modelBuilder.Entity<LargeDataTestWithIndex>()
+                .ToTable("LargeDataTestWithIndex", "dbo");
+
             modelBuilder.Entity<SalesOrderDetail>()
                 .HasKey(sod => new { sod.SalesOrderID, sod.ProductID });
 
@@ -38,6 +46,9 @@ namespace AdventureWorksQueryPerformance.DBContext
 
             modelBuilder.Entity<Customer>()
                 .HasKey(c => c.CustomerID);
+
+            modelBuilder.Entity<LargeDataTest>()
+                .HasKey(l => l.Id);
 
             modelBuilder.Entity<SalesOrderHeader>()
                 .HasMany(soh => soh.SalesOrderDetails)
