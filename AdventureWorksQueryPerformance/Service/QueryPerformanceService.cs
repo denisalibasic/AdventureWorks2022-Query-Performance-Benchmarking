@@ -47,6 +47,10 @@ namespace AdventureWorksQueryPerformance.Service
             await _clearCacheService.ClearCacheAndExecuteAsync(() =>_executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfLargeDataGreaterThanWithIndex }, EfQueryEnums.EfLargeDataGreaterThanWithIndex.GetDescription()));
             await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawLargeDataGreaterThanWithIndex }, EfRawQueryEnums.RawLargeDataGreaterThanWithIndex.GetDescription()));
 
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new StoredProcedureQueryRequest { QueryType = SpQueryEnums.SpLargeDataGreaterThanWithIndexSecond }, SpQueryEnums.SpLargeDataGreaterThanWithIndexSecond.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new EFQueryRequest { QueryType = EfQueryEnums.EfLargeDataGreaterThanWithIndexSecond }, EfQueryEnums.EfLargeDataGreaterThanWithIndexSecond.GetDescription()));
+            await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new RawSQLQueryRequest { QueryType = EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond }, EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond.GetDescription()));
+
             var results = _executeAndMeasureTimeService.GetResults();
 
             string filePath = "QueryPerformanceResults.html";

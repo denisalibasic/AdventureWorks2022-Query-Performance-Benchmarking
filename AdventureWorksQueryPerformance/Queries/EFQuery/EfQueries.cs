@@ -167,10 +167,10 @@ namespace AdventureWorksQueryPerformance.Queries.EFQuery
                 }).ToListAsync();
         }
 
-        public static async Task<List<LargeDataTestResult>> GetLargeDataByValueWithIndexAsync(AdventureWorksDbContext context)
+        public static async Task<List<LargeDataTestResult>> GetLargeDataByValueWithIndexAsync(AdventureWorksDbContext context, Decimal minValue)
         {
             return await context.LargeDataTestWithIndices
-                .Where(item => item.Value > 4917)
+                .Where(item => item.Value > minValue)
                 .Select(item => new LargeDataTestResult
                 {
                     Id = item.Id,

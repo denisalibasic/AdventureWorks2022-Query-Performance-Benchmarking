@@ -45,7 +45,14 @@ namespace AdventureWorksQueryPerformance.Handler
             else if (request.QueryType == EfQueryEnums.EfLargeDataGreaterThanWithIndex)
             {
                 Log.Information("Executing EF Get large data greater than 4917 value in table with index...");
-                await EfQueries.GetLargeDataByValueWithIndexAsync(_context);
+                var minValue = 4917;
+                await EfQueries.GetLargeDataByValueWithIndexAsync(_context, minValue);
+            }
+            else if (request.QueryType == EfQueryEnums.EfLargeDataGreaterThanWithIndexSecond)
+            {
+                Log.Information("Executing EF Get large data greater than 4917 value in table with index...");
+                var minValue = 1000;
+                await EfQueries.GetLargeDataByValueWithIndexAsync(_context, minValue);
             }
             return Unit.Value;
         }

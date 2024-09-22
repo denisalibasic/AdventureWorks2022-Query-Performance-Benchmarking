@@ -18,6 +18,9 @@
         EfLargeDataGreaterThan,
 
         [EnumDescription("EF Get large data greater than 4917 value in table with index")]
-        EfLargeDataGreaterThanWithIndex
+        EfLargeDataGreaterThanWithIndex,
+
+        [EnumDescription("EF Get large data greater than 1000 value in table with index")]
+        EfLargeDataGreaterThanWithIndexSecond
     }
 }

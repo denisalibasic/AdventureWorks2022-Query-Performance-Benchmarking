@@ -17,7 +17,7 @@ Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(configuration)
     .CreateLogger();
 
-Log.Information("Application Starting...");
+Log.Information("Application execution Starting...");
 
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);

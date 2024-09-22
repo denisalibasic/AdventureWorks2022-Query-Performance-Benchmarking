@@ -93,5 +93,12 @@ namespace AdventureWorksQueryPerformance.Queries.RawQuery
                 select * from [dbo].[LargeDataTestWithIndex]
 	            where Value > 4917";
         }
+
+        public static string GetSalesLargeDataByValueWithIndexSecond()
+        {
+            return @"
+                select * from [dbo].[LargeDataTestWithIndex]
+	            where Value > 1000";
+        }
     }
 }

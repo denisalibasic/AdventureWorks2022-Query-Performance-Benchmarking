@@ -30,6 +30,7 @@ namespace AdventureWorksQueryPerformance.Handler
                 EfRawQueryEnums.RawLargeData => EfRawQueries.GetSalesLargeDataAllRows(),
                 EfRawQueryEnums.RawLargeDataGreaterThan => EfRawQueries.GetSalesLargeDataByValue(),
                 EfRawQueryEnums.RawLargeDataGreaterThanWithIndex => EfRawQueries.GetSalesLargeDataByValueWithIndex(),
+                EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond => EfRawQueries.GetSalesLargeDataByValueWithIndexSecond(),
                 _ => throw new ArgumentOutOfRangeException(nameof(request.QueryType), "Unknown query type")
             };
 
@@ -43,6 +44,18 @@ namespace AdventureWorksQueryPerformance.Handler
                 var endDate = new DateTime(2014, 12, 31);
                 command.Parameters.Add(new SqlParameter("@StartDate", SqlDbType.DateTime) { Value = startDate });
                 command.Parameters.Add(new SqlParameter("@EndDate", SqlDbType.DateTime) { Value = endDate });
+            }
+
+            if (request.QueryType.Equals(EfRawQueryEnums.RawLargeDataGreaterThanWithIndex))
+            {
+                var minValue = 4917;
+                command.Parameters.Add(new SqlParameter("@MinValue", SqlDbType.Decimal) { Value = minValue });
+            }
+
+            if (request.QueryType.Equals(EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond))
+            {
+                var minValue = 1000;
+                command.Parameters.Add(new SqlParameter("@MinValue", SqlDbType.Decimal) { Value = minValue });
             }
 
             using var reader = await command.ExecuteReaderAsync(cancellationToken);

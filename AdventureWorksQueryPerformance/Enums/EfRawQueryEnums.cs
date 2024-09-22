@@ -15,6 +15,9 @@
         RawLargeDataGreaterThan,
 
         [EnumDescription("Raw query Get large data greater than 4917 value in table with index")]
-        RawLargeDataGreaterThanWithIndex
+        RawLargeDataGreaterThanWithIndex,
+
+        [EnumDescription("Raw query Get large data greater than 1000 value in table with index")]
+        RawLargeDataGreaterThanWithIndexSecond
     }
 }
