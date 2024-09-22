@@ -10,17 +10,14 @@ namespace AdventureWorksQueryPerformance.Service
     {
         private readonly ClearCacheService _clearCacheService;
         private readonly ExecuteAndMeasureTimeService _executeAndMeasureTimeService;
-        private readonly DisplayResultsService _displayResultsService;
         private readonly GenerateBarChartHtmlService _generateBarChartHtmlService;
 
         public QueryPerformanceService(ClearCacheService clearCacheService
             ,ExecuteAndMeasureTimeService executeAndMeasureTimeService
-            ,DisplayResultsService displayResultsService
             ,GenerateBarChartHtmlService generateBarChartHtml)
         {
             _clearCacheService = clearCacheService;
             _executeAndMeasureTimeService = executeAndMeasureTimeService;
-            _displayResultsService = displayResultsService;
             _generateBarChartHtmlService = generateBarChartHtml;
         }
 

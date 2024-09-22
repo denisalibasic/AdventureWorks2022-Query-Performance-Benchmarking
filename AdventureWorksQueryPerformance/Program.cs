@@ -42,7 +42,6 @@ services.AddTransient<StoredProcedureQueryHandler>();
 services.AddTransient<QueryPerformanceService>();
 services.AddTransient<ClearCacheService>();
 services.AddTransient<ExecuteAndMeasureTimeService>();
-services.AddTransient<DisplayResultsService>();
 services.AddTransient<GenerateBarChartHtmlService>();
 
 var serviceProvider = services.BuildServiceProvider();
