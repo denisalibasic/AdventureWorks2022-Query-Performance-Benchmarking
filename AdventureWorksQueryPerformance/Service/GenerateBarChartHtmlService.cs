@@ -1,8 +1,9 @@
-﻿using System.Text;
+﻿using AdventureWorksQueryPerformance.Result;
+using System.Text;
 
 namespace AdventureWorksQueryPerformance.Service
 {
-    public class GenerateBarChartHtmlService
+    public class GenerateBarChartHtmlService : IGenerateBarChartHtmlService
     {
         public void GenerateBarChartHtml(List<TaskResult> results, string filePath)
         {
@@ -19,7 +20,7 @@ namespace AdventureWorksQueryPerformance.Service
             sb.AppendLine("<body>");
             sb.AppendLine("<h1>Query Performance Results</h1>");
 
-            // Bar chart
+            // Overall bar chart
             sb.AppendLine("<canvas id='myBarChart' width='800' height='400'></canvas>");
             sb.AppendLine("<script>");
             sb.AppendLine("const ctxBar = document.getElementById('myBarChart').getContext('2d');");
@@ -61,25 +62,25 @@ namespace AdventureWorksQueryPerformance.Service
             sb.AppendLine("});");
             sb.AppendLine("</script>");
 
-            // Pie charts for each query type
-            GeneratePieChart(sb, "SalesPerformance", results, new[] {
-                "SpSalesPerformance", "EfSalesPerformance", "RawSalesPerformance"
+            // Generate bar charts for each query type
+            GenerateGroupedBarChart(sb, "SalesPerformance", results, new[] {
+                "SpSalesPerformance", "EfSalesPerformance", "RawSalesPerformance", "DapperSalesPerformance"
             });
 
-            GeneratePieChart(sb, "LargeData", results, new[] {
-                "SpLargeData", "EfLargeData", "RawLargeData"
+            GenerateGroupedBarChart(sb, "LargeData", results, new[] {
+                "SpLargeData", "EfLargeData", "RawLargeData", "DapperLargeData"
             });
 
-            GeneratePieChart(sb, "LargeDataGreaterThan", results, new[] {
-                "SpLargeDataGreaterThan", "EfLargeDataGreaterThan", "RawLargeDataGreaterThan"
+            GenerateGroupedBarChart(sb, "LargeDataGreaterThan", results, new[] {
+                "SpLargeDataGreaterThan", "EfLargeDataGreaterThan", "RawLargeDataGreaterThan", "DapperLargeDataGreaterThan"
             });
 
-            GeneratePieChart(sb, "LargeDataGreaterThanWithIndex", results, new[] {
-                "SpLargeDataGreaterThanWithIndex", "EfLargeDataGreaterThanWithIndex", "RawLargeDataGreaterThanWithIndex"
+            GenerateGroupedBarChart(sb, "LargeDataGreaterThanWithIndex", results, new[] {
+                "SpLargeDataGreaterThanWithIndex", "EfLargeDataGreaterThanWithIndex", "RawLargeDataGreaterThanWithIndex", "DapperLargeDataGreaterThanWithIndex"
             });
 
-            GeneratePieChart(sb, "LargeDataGreaterThanWithIndexSecond", results, new[] {
-                "SpLargeDataGreaterThanWithIndexSecond", "EfLargeDataGreaterThanWithIndexSecond", "RawLargeDataGreaterThanWithIndexSecond"
+            GenerateGroupedBarChart(sb, "LargeDataGreaterThanWithIndexSecond", results, new[] {
+                "SpLargeDataGreaterThanWithIndexSecond", "EfLargeDataGreaterThanWithIndexSecond", "RawLargeDataGreaterThanWithIndexSecond", "DapperLargeDataGreaterThanWithIndexSecond"
             });
 
             sb.AppendLine("</body>");
@@ -88,13 +89,13 @@ namespace AdventureWorksQueryPerformance.Service
             File.WriteAllText(filePath, sb.ToString());
         }
 
-        private void GeneratePieChart(StringBuilder sb, string chartId, List<TaskResult> results, string[] taskNames)
+        private void GenerateGroupedBarChart(StringBuilder sb, string chartId, List<TaskResult> results, string[] taskNames)
         {
-            sb.AppendLine($"<canvas id='{chartId}' width='400' height='400'></canvas>");
+            sb.AppendLine($"<canvas id='{chartId}' width='800' height='400'></canvas>");
             sb.AppendLine("<script>");
             sb.AppendLine($"const ctx{chartId} = document.getElementById('{chartId}').getContext('2d');");
             sb.AppendLine($"const {chartId}Chart = new Chart(ctx{chartId}, {{");
-            sb.AppendLine("    type: 'pie',");
+            sb.AppendLine("    type: 'bar',");
             sb.AppendLine("    data: {");
             sb.AppendLine("        labels: [");
 
@@ -108,6 +109,7 @@ namespace AdventureWorksQueryPerformance.Service
             sb.AppendLine("],");
 
             sb.AppendLine("        datasets: [{");
+            sb.AppendLine("            label: 'Elapsed Time (ms)',");
             sb.AppendLine("            data: [");
 
             // Data
@@ -119,10 +121,17 @@ namespace AdventureWorksQueryPerformance.Service
                     sb.Append(", ");
             }
             sb.AppendLine("],");
-            sb.AppendLine("            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)'],");
-            sb.AppendLine("            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)'],");
+            sb.AppendLine("            backgroundColor: 'rgba(153, 102, 255, 0.2)',");
+            sb.AppendLine("            borderColor: 'rgba(153, 102, 255, 1)',");
             sb.AppendLine("            borderWidth: 1");
             sb.AppendLine("        }]");
+            sb.AppendLine("    },");
+            sb.AppendLine("    options: {");
+            sb.AppendLine("        scales: {");
+            sb.AppendLine("            y: {");
+            sb.AppendLine("                beginAtZero: true");
+            sb.AppendLine("            }");
+            sb.AppendLine("        }");
             sb.AppendLine("    }");
             sb.AppendLine("});");
             sb.AppendLine("</script>");

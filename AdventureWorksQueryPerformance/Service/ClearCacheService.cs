@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AdventureWorksQueryPerformance.Service
 {
-    public class ClearCacheService
+    public class ClearCacheService : IClearCacheService
     {
         private readonly IDbContextFactory<AdventureWorksDbContext> _dbContext;
 

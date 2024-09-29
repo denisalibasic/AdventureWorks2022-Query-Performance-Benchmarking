@@ -1,9 +1,10 @@
-﻿using MediatR;
+﻿using AdventureWorksQueryPerformance.Result;
+using MediatR;
 using System.Diagnostics;
 
 namespace AdventureWorksQueryPerformance.Service
 {
-    public class ExecuteAndMeasureTimeService
+    public class ExecuteAndMeasureTimeService : IExecuteAndMeasureTimeService
     {
         private readonly IMediator _mediator;
         private readonly List<TaskResult> _results = new();
@@ -36,11 +37,5 @@ namespace AdventureWorksQueryPerformance.Service
         {
             _results.Clear();
         }
-    }
-
-    public class TaskResult
-    {
-        public string TaskName { get; set; } = string.Empty;
-        public long ElapsedMilliseconds { get; set; }
     }
 }

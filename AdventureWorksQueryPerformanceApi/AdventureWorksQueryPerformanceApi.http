@@ -1,0 +1,6 @@
+@AdventureWorksQueryPerformanceApi_HostAddress = http://localhost:5141
+
+GET {{AdventureWorksQueryPerformanceApi_HostAddress}}/run-queries/
+Accept: application/json
+
+###
