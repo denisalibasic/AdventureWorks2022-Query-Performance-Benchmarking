@@ -57,6 +57,7 @@ namespace AdventureWorksQueryPerformance.Handler
             }
 
             await dbConnection.QueryAsync(query);
+
             return Unit.Value;
         }
 

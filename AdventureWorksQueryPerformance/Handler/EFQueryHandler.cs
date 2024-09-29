@@ -54,6 +54,7 @@ namespace AdventureWorksQueryPerformance.Handler
                 var minValue = 1000;
                 await EfQueries.GetLargeDataByValueWithIndexAsync(_context, minValue);
             }
+
             return Unit.Value;
         }
     }
