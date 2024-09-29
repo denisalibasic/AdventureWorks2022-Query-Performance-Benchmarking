@@ -30,6 +30,7 @@ public static class ServiceRegistrationExtensions
         services.AddTransient<IClearCacheService, ClearCacheService>();
         services.AddTransient<IExecuteAndMeasureTimeService, ExecuteAndMeasureTimeService>();
         services.AddTransient<IGenerateBarChartHtmlService, GenerateBarChartHtmlService>();
+        services.AddTransient<IRabbitMqService, RabbitMqService>();
     }
 
     public static ServiceProvider BuildServiceProvider()
