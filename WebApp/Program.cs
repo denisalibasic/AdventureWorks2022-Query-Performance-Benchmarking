@@ -1,15 +1,16 @@
-using AdventureWorksQueryPerformanceApi;
+using WebApp;
 using WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSignalR();
-
 builder.Services.AddHttpClient();
-builder.Services.AddSignalR();
+builder.Services.AddSingleton <RabbitMqConsumer>();
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-XSRF-TOKEN";
+});
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 var app = builder.Build();
 
@@ -23,7 +24,5 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-app.MapHub<QueryResultHub>("/queryResultHub");
 
 app.Run();

@@ -5,17 +5,17 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-<p>Welcome to your new app.</p>
+<h1>Query performance page!</h1>
+<p>To start the queries click on the button</p>
 
 <button @onclick="RunQueries" class="btn btn-primary" disabled="@isLoading">
     @if (isLoading)
     {
         <div>
-            <h2>Latest Message</h2>
-            @if (latestMessage != "")
+            <h2>Done Queries</h2>
+            @foreach (var message in latestMessages)
             {
-                <p>@latestMessage</p>
+                <p>@message</p>
             }
         </div>
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -30,6 +30,30 @@
 <div>
     @if (results != null && results.Count > 0)
     {
+        <h2>Query Results</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Task Name</th>
+                    <th>Elapsed Milliseconds</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in results)
+                {
+                    <tr>
+                        <td>@result.TaskName</td>
+                        <td>@result.ElapsedMilliseconds</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<div>
+    @if (results != null && results.Count > 0)
+    {
         //TOADD CHART
     }
 </div>
@@ -37,27 +61,28 @@
 @code {
     private bool isLoading = false;
     private List<QueryResult> results = new List<QueryResult>();
-    private HubConnection hubConnection;
-    private string latestMessage;
+    private RabbitMqConsumer _rabbitMqConsumer;
+    private List<string> latestMessages = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(Navigation.ToAbsoluteUri("/queryResultHub"))
-            .Build();
+        _rabbitMqConsumer = new RabbitMqConsumer();
+        _rabbitMqConsumer.StartConsuming(OnMessageReceived);
 
-        hubConnection.On<string>("ReceiveQueryResult", (message) =>
-        {
-            latestMessage = message;
-            StateHasChanged();
-        });
+        await Task.CompletedTask;
+    }
 
-        await hubConnection.StartAsync();
+    private void OnMessageReceived(string message)
+    {
+        latestMessages.Add(message);
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task RunQueries()
     {
         isLoading = true;
+        latestMessages = new List<string>();
+        results = new List<QueryResult>();
         StateHasChanged();
 
         try
@@ -65,7 +90,8 @@
             var response = await Http.GetAsync("http://localhost:5141/run-queries");
             if (response.IsSuccessStatusCode)
             {
-                results = await response.Content.ReadFromJsonAsync<List<QueryResult>>();
+                var queryResults = await response.Content.ReadFromJsonAsync<List<QueryResult>>();
+                results = queryResults;
             }
         }
         catch (Exception ex)
