@@ -1,5 +1,5 @@
 ﻿@page "/"
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
@@ -12,7 +12,8 @@
     @if (isLoading)
     {
         <div>
-            <h2>Done Queries</h2>
+            <h2>List of executed queries</h2>
+            <p>(Some of the queries will take a lot more time to execute)</p>
             @foreach (var message in latestMessages)
             {
                 <p>@message</p>
@@ -87,7 +88,9 @@
 
         try
         {
-            var response = await Http.GetAsync("http://localhost:5141/run-queries");
+            var response = await HttpClientFactory
+                .CreateClient("QueryPerformance")
+                .GetAsync("http://localhost:5141/run-queries");
             if (response.IsSuccessStatusCode)
             {
                 var queryResults = await response.Content.ReadFromJsonAsync<List<QueryResult>>();

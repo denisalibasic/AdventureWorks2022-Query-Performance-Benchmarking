@@ -3,7 +3,10 @@ using WebApp.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("QueryPerformance", client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(10);
+});
 builder.Services.AddSingleton <RabbitMqConsumer>();
 builder.Services.AddAntiforgery(options =>
 {
