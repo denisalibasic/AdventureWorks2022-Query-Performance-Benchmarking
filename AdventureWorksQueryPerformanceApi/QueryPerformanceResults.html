@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<title>Query Performance Results</title>
+<script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+</head>
+<body>
+<h1>Query Performance Results</h1>
+<canvas id='myBarChart' width='800' height='400'></canvas>
+<script>
+const ctxBar = document.getElementById('myBarChart').getContext('2d');
+const myBarChart = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+        labels: [
+'Stored Procedure Get top 100 customers details', 'Stored Procedure Cursor Get top 100 customers details', 'Raw query Get top 100 customers details', 'Ef Foreach Get top 100 customers details', 'EF Get top 100 customers details', 'Dapper Get top 100 customers details', 'Stored Procedure Get sales performance between 01/01/2012 and 31/12/2014', 'EF Get sales performance between 01/01/2012 and 31/12/2014', 'Raw query Get sales performance between 01/01/2012 and 31/12/2014', 'Dapper Get sales performance between 01/01/2012 and 31/12/2014', 'Stored Procedure Get large data', 'EF Get large data', 'Raw query Get large data', 'Dapper Get large data', 'Stored Procedure Get large data greater than 4917 value', 'EF Get large data greater than 4917 value', 'Raw query Get large data greater than 4917 value', 'Dapper Get large data greater than 4917 value', 'Stored Procedure Get large data greater than 4917 value in table with index', 'EF Get large data greater than 4917 value in table with index', 'Raw query Get large data greater than 4917 value in table with index', 'Dapper Get large data greater than 4917 value in table with index', 'Stored Procedure Get large data greater than 1000 value in table with index', 'EF Get large data greater than 1000 value in table with index', 'Raw query Get large data greater than 1000 value in table with index', 'Dapper Get large data greater than 1000 value in table with index'],
+        datasets: [{
+            label: 'Elapsed Time (ms)',
+            data: [
+547, 9163, 380, 137328, 93, 548, 189, 22, 193, 224, 12943, 27951, 12436, 18969, 922, 1531, 945, 965, 332, 542, 376, 427, 2648, 4916, 3312, 3288],
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>

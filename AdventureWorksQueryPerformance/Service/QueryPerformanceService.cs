@@ -87,7 +87,10 @@ namespace AdventureWorksQueryPerformance.Service
             await _clearCacheService.ClearCacheAndExecuteAsync(() => _executeAndMeasureTimeService.ExecuteAndMeasureTimeAsync(new DapperQueryRequest { QueryType = DapperQueryEnums.DapperLargeDataGreaterThanWithIndexSecond }, DapperQueryEnums.DapperLargeDataGreaterThanWithIndexSecond.GetDescription()));
             _rabbitMqService.PublishMessage($"Executed " + DapperQueryEnums.DapperLargeDataGreaterThanWithIndexSecond.GetDescription());
 
-            return _executeAndMeasureTimeService.GetResults();
+            var results = _executeAndMeasureTimeService.GetResults();
+            string filePath = "QueryPerformanceResults.html";
+            _generateBarChartHtmlService.GenerateBarChartHtml(results, filePath);
+            return results;
         }
     }
 }

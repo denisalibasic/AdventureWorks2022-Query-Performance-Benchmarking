@@ -20,7 +20,7 @@
             }
         </div>
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span>Loading...</span>
+        <span>Executing queries...</span>
     }
     else
     {
@@ -49,13 +49,6 @@
                 }
             </tbody>
         </table>
-    }
-</div>
-
-<div>
-    @if (results != null && results.Count > 0)
-    {
-        //TOADD CHART
     }
 </div>
 
@@ -106,10 +99,5 @@
             isLoading = false;
             StateHasChanged();
         }
-    }
-
-    private void PrepareChartData(List<QueryResult> queryResults)
-    {
-        //TODO
     }
 }
