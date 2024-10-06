@@ -50,6 +50,60 @@ Navigate to the docker-compose file for RabbitMQ and run:
 docker-compose up -d
  ```
 
+Donwload and restore database:
+- Download AdventureWorks database from here: [AdventureWorks sample databases](https://learn.microsoft.com/en-us/sql/samples/adventureworks-install-configure?view=sql-server-ver16&tabs=ssms)
+- Place AdventureWorks2022.bak into media folder of the Docker where database is being run
+- Run query to restore database from downloaded backup:
+  ```bash
+  RESTORE FILELISTONLY
+  FROM DISK = '/media/AdventureWorks2022.bak';
+  GO
+  
+  RESTORE DATABASE [AdventureWorks2022]
+  FROM DISK = '/media/AdventureWorks2022.bak'
+  WITH MOVE 'AdventureWorks2022_Data' TO '/var/opt/mssql/data/AdventureWorks2022.mdf',  
+  MOVE 'AdventureWorks2022_Log' TO '/var/opt/mssql/data/AdventureWorks2022.ldf',  
+  REPLACE;
+   ```
+- Run query to create LargeDataTest table:
+  ```bash
+  INSERT INTO LargeDataTest (Name, Date, Value)
+  SELECT TOP 15000000
+  	CONCAT('Order ', soh.SalesOrderId, ' Detail ', sod.SalesOrderDetailID) AS Name,
+  	soh.OrderDate as Date,
+  	sod.LineTotal as Value
+  FROM
+  	Sales.SalesOrderHeader as soh
+  CROSS JOIN
+  	Sales.SalesOrderDetail as sod
+  ```
+- Run query to create LargeDataTestWithIndex table and fil it with data:
+  ```bash
+  CREATE TABLE [dbo].[LargeDataTestWithIndex](
+  	[ID] [int] IDENTITY(1,1) NOT NULL,
+  	[Name] [nvarchar](100) NULL,
+  	[Date] [datetime] NULL,
+  	[Value] [decimal](18, 2) NULL,
+  PRIMARY KEY CLUSTERED 
+  (
+  	[ID] ASC
+  )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+  ) ON [PRIMARY]
+  
+  GO
+  INSERT INTO [dbo].[LargeDataTestWithIndex] ([Name], [Date], [Value])
+  SELECT Name, Date, Value FROM [dbo].[LargeDataTest]
+  ```
+- Create index on LargeDataTestWithIndex table:
+  ```bash
+  CREATE NONCLUSTERED INDEX [IDX_Value_Name_Date] ON [dbo].[LargeDataTestWithIndex]
+  (
+  	[Value] ASC
+  )
+  INCLUDE([Name],[Date]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+  GO
+  ```
+
 ## AdventureWorksQueryPerformance
 A console application built on .NET 8 that benchmarks various query methods. It performs the following actions:
 
