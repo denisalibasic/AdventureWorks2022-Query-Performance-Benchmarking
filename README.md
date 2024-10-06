@@ -103,6 +103,178 @@ Donwload and restore database:
   INCLUDE([Name],[Date]) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
   GO
   ```
+- Create SP GetTopCustomersDetailedWithCursor
+  ```bash
+  CREATE PROCEDURE [dbo].[GetTopCustomersDetailedWithCursor]
+  AS
+  BEGIN
+      DECLARE @CustomerID INT;
+      DECLARE @TotalSpent DECIMAL(18, 2);
+  
+      DECLARE customer_cursor CURSOR FOR
+      SELECT TOP 100 CustomerID, SUM(TotalDue) AS TotalSpent
+      FROM Sales.SalesOrderHeader
+      GROUP BY CustomerID
+      ORDER BY TotalSpent DESC;
+  
+      OPEN customer_cursor;
+  
+      FETCH NEXT FROM customer_cursor INTO @CustomerID, @TotalSpent;
+  
+      CREATE TABLE #CustomerSpendings (
+          CustomerID INT,
+          ProductID INT,
+          ProductName NVARCHAR(50),
+          OrderDate DATETIME,
+          OrderQty SMALLINT,
+          UnitPrice DECIMAL(18, 2),
+          LineTotal DECIMAL(18, 2),
+          TotalDue DECIMAL(18, 2),
+          TotalOrders INT,
+          TotalSalesForProduct DECIMAL(18, 2),
+          TotalSpent DECIMAL(18, 2)
+      );
+  
+      WHILE @@FETCH_STATUS = 0
+      BEGIN
+          INSERT INTO #CustomerSpendings
+          SELECT 
+              c.CustomerID,
+              p.ProductID,
+              p.Name AS ProductName,
+              soh.OrderDate,
+              sod.OrderQty,
+              sod.UnitPrice,
+              sod.LineTotal,
+              soh.TotalDue,
+              (SELECT COUNT(*) 
+               FROM Sales.SalesOrderHeader soh2 
+               WHERE soh2.CustomerID = c.CustomerID) AS TotalOrders,
+              (SELECT SUM(sod2.LineTotal)
+               FROM Sales.SalesOrderDetail sod2
+               WHERE sod2.ProductID = p.ProductID) AS TotalSalesForProduct,
+              @TotalSpent AS TotalSpent
+          FROM Sales.SalesOrderHeader soh
+          JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+          JOIN Production.Product p ON sod.ProductID = p.ProductID
+          JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+          WHERE c.CustomerID = @CustomerID
+            AND soh.OrderDate BETWEEN '2012-01-01' AND '2014-12-31';
+  
+          FETCH NEXT FROM customer_cursor INTO @CustomerID, @TotalSpent;
+      END
+  
+      CLOSE customer_cursor;
+      DEALLOCATE customer_cursor;
+  
+      SELECT * FROM #CustomerSpendings;
+  
+      DROP TABLE #CustomerSpendings;
+  END
+  ```
+- Create SP GetTopCustomersDetailed:
+  ```bash
+  CREATE PROCEDURE [dbo].[GetTopCustomersDetailed]
+  AS
+  BEGIN
+      WITH TopCustomers AS (
+          SELECT TOP 100 CustomerID, SUM(TotalDue) AS TotalSpent
+          FROM Sales.SalesOrderHeader
+          GROUP BY CustomerID
+          ORDER BY TotalSpent DESC
+      )
+      SELECT 
+          c.CustomerID,
+          p.ProductID,
+          p.Name AS ProductName,
+          soh.OrderDate,
+          sod.OrderQty,
+          sod.UnitPrice,
+          sod.LineTotal,
+          soh.TotalDue,
+          COUNT(soh.SalesOrderID) OVER(PARTITION BY c.CustomerID) AS TotalOrders,
+          (SELECT SUM(sod2.LineTotal)
+           FROM Sales.SalesOrderDetail sod2
+           WHERE sod2.ProductID = p.ProductID) AS TotalSalesForProduct,
+          tc.TotalSpent
+      FROM Sales.SalesOrderHeader soh
+      JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+      JOIN Production.Product p ON sod.ProductID = p.ProductID
+      JOIN Sales.Customer c ON soh.CustomerID = c.CustomerID
+      JOIN TopCustomers tc ON c.CustomerID = tc.CustomerID
+      WHERE soh.OrderDate BETWEEN '2012-01-01' AND '2014-12-31'
+      ORDER BY tc.TotalSpent DESC;
+  END
+  ```
+- Create SP GetSalesPerformance:
+  ```bash
+  CREATE PROCEDURE [dbo].[GetSalesPerformance]
+      @StartDate DATE,
+      @EndDate DATE
+  AS
+  BEGIN
+      CREATE TABLE #SalesPerformance (
+          Rank INT,
+          Year INT,
+          ProductID INT,
+          TotalSales DECIMAL(18, 2),
+          TotalOrders INT
+      );
+  
+      INSERT INTO #SalesPerformance (Rank, Year, ProductID, TotalSales, TotalOrders)
+      SELECT
+          ROW_NUMBER() OVER (PARTITION BY YEAR(soh.OrderDate) ORDER BY SUM(sod.LineTotal) DESC) AS Rank,
+          YEAR(soh.OrderDate) AS Year,
+          sod.ProductID AS ProductID,
+          SUM(sod.LineTotal) AS TotalSales,
+          COUNT(soh.SalesOrderID) AS TotalOrders
+      FROM Sales.SalesOrderHeader soh
+      JOIN Sales.SalesOrderDetail sod ON soh.SalesOrderID = sod.SalesOrderID
+      WHERE soh.OrderDate BETWEEN @StartDate AND @EndDate
+      GROUP BY YEAR(soh.OrderDate), sod.ProductID;
+  
+      SELECT
+          Rank,
+          Year,
+          ProductID,
+          TotalSales,
+          TotalOrders
+      FROM #SalesPerformance
+      ORDER BY TotalSales DESC;
+  
+      DROP TABLE #SalesPerformance;
+  END;
+  ```
+
+- Crete SP GetSalesLargeDataByValueWithIndex:
+  ```bash
+  CREATE PROCEDURE [dbo].[GetSalesLargeDataByValueWithIndex]
+  @MinValue DECIMAL(18, 2)
+  AS
+  BEGIN
+      select * from [dbo].[LargeDataTestWithIndex]
+  	where Value > @MinValue
+  END;
+  ```
+
+- Crete SP GetSalesLargeDataByValue:
+  ```bash
+  CREATE PROCEDURE [dbo].[GetSalesLargeDataByValue]
+  AS
+  BEGIN
+      select * from [dbo].[LargeDataTest]
+  	where Value > 4917
+  END;
+  ```
+
+- Crete SP GetSalesLargeDataAllRows:
+  ```bash
+  CREATE PROCEDURE [dbo].[GetSalesLargeDataAllRows]
+  AS
+  BEGIN
+      select * from LargeDataTest
+  END;
+  ```
 
 ## AdventureWorksQueryPerformance
 A console application built on .NET 8 that benchmarks various query methods. It performs the following actions:
