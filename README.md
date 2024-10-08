@@ -2,7 +2,7 @@
 This repository demonstrates and benchmarks different query approaches in C# .NET 8 using the AdventureWorks2022 database. It compares the performance of the following query types:
 
 - Entity Framework (EF) Queries
-- Raw SQL in EF
+- Raw SQL
 - Stored Procedures (SP)
 - Dapper
 
