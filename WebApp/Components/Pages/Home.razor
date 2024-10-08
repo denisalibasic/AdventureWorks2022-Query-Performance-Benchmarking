@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Navigation
+@inject IConfiguration Configuration
 @rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
@@ -57,10 +58,12 @@
     private List<QueryResult> results = new List<QueryResult>();
     private RabbitMqConsumer _rabbitMqConsumer;
     private List<string> latestMessages = new List<string>();
+    private string queryEndpoint;
 
     protected override async Task OnInitializedAsync()
     {
-        _rabbitMqConsumer = new RabbitMqConsumer();
+        queryEndpoint = Configuration["QueryEndpoint"];
+        _rabbitMqConsumer = new RabbitMqConsumer(Configuration);
         _rabbitMqConsumer.StartConsuming(OnMessageReceived);
 
         await Task.CompletedTask;
@@ -83,7 +86,7 @@
         {
             var response = await HttpClientFactory
                 .CreateClient("QueryPerformance")
-                .GetAsync("http://localhost:5141/run-queries");
+                .GetAsync(queryEndpoint);
             if (response.IsSuccessStatusCode)
             {
                 var queryResults = await response.Content.ReadFromJsonAsync<List<QueryResult>>();
