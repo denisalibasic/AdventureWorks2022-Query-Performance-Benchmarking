@@ -10,17 +10,20 @@ namespace WebApp
         private readonly IModel _channel;
         private readonly ConcurrentQueue<string> _messages = new ConcurrentQueue<string>();
 
-        public RabbitMqConsumer()
+        public RabbitMqConsumer(IConfiguration configuration)
         {
+            var rabbitMqSettings = configuration.GetSection("RabbitMq");
+
             var factory = new ConnectionFactory()
             {
-                HostName = "localhost",
-                UserName = "user",
-                Password = "password"
+                HostName = rabbitMqSettings["HostName"],
+                UserName = rabbitMqSettings["UserName"],
+                Password = rabbitMqSettings["Password"]
             };
+
             var connection = factory.CreateConnection();
             _channel = connection.CreateModel();
-            _channel.QueueDeclare(queue: "query_results",
+            _channel.QueueDeclare(queue: rabbitMqSettings["QueueName"],
                                  durable: false,
                                  exclusive: false,
                                  autoDelete: false,

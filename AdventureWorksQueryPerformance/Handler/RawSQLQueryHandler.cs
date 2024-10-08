@@ -25,12 +25,12 @@ namespace AdventureWorksQueryPerformance.Handler
 
             string query = request.QueryType switch
             {
-                EfRawQueryEnums.RawGetTopHundred => EfRawQueries.GetTopCustomersDetailedQuery(),
-                EfRawQueryEnums.RawSalesPerformance => EfRawQueries.GetSalesPerformance(),
-                EfRawQueryEnums.RawLargeData => EfRawQueries.GetSalesLargeDataAllRows(),
-                EfRawQueryEnums.RawLargeDataGreaterThan => EfRawQueries.GetSalesLargeDataByValue(),
-                EfRawQueryEnums.RawLargeDataGreaterThanWithIndex => EfRawQueries.GetSalesLargeDataByValueWithIndex(),
-                EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond => EfRawQueries.GetSalesLargeDataByValueWithIndexSecond(),
+                EfRawQueryEnums.RawGetTopHundred => RawQueries.GetTopCustomersDetailedQuery(),
+                EfRawQueryEnums.RawSalesPerformance => RawQueries.GetSalesPerformance(),
+                EfRawQueryEnums.RawLargeData => RawQueries.GetSalesLargeDataAllRows(),
+                EfRawQueryEnums.RawLargeDataGreaterThan => RawQueries.GetSalesLargeDataByValue(),
+                EfRawQueryEnums.RawLargeDataGreaterThanWithIndex => RawQueries.GetSalesLargeDataByValueWithIndex(),
+                EfRawQueryEnums.RawLargeDataGreaterThanWithIndexSecond => RawQueries.GetSalesLargeDataByValueWithIndexSecond(),
                 _ => throw new ArgumentOutOfRangeException(nameof(request.QueryType), "Unknown query type")
             };
 

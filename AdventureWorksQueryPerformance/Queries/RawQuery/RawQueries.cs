@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AdventureWorksQueryPerformance.Queries.RawQuery
+﻿namespace AdventureWorksQueryPerformance.Queries.RawQuery
 {
-    public static class EfRawQueries
+    public static class RawQueries
     {
         public static string GetTopCustomersDetailedQuery()
         {
