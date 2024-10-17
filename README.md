@@ -361,4 +361,4 @@ Feel free to fork this repository, make improvements, and submit a pull request.
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Blog
-Link to related blog post: [Cloud codeblock](https://cloudcodeblock.com/2024/10/15/benchmarking-query-performance-with-adventureworks2022-in-net-8/)
+Link to related blog post: [Cloud codeblock](https://cloudcodeblock.com/2024/10/17/benchmarking-query-performance-with-adventureworks2022-in-net-8/)
